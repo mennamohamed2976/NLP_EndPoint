@@ -4,8 +4,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.decision_layer import predict_from_file
-from src.config import ORGANS
+from decision_layer import predict_from_file
+from config import ORGANS
 
 app = FastAPI(
     title="STODS NLP AI Service",
