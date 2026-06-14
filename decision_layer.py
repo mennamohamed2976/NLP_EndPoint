@@ -6,7 +6,7 @@ import os
 import pickle          # ✅ لحفظ الموديل كـ pickle لو محتاج
 import joblib          # ✅ الأفضل لحفظ الموديلات
 import pandas as pd
-from src.config import ORGANS
+from config import ORGANS
 from PyPDF2 import PdfReader
 
 
