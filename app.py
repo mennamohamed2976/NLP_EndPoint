@@ -1,11 +1,19 @@
 import os
 import shutil
+from enum import Enum
+
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from decision_layer import predict_from_file
 from config import ORGANS
+
+
+class OwnerType(str, Enum):
+    donor = "donor"
+    patient = "patient"
+
 
 app = FastAPI(
     title="STODS NLP AI Service",
@@ -47,7 +55,8 @@ async def health_check():
 
 @app.post("/analyze-report")
 async def analyze_report(
-    patient_id: str = Form(...),
+    owner_type: OwnerType = Form(...),
+    owner_id: str = Form(...),
     report: UploadFile = File(...)
 ):
     # Validate file extension
@@ -62,7 +71,7 @@ async def analyze_report(
 
     file_path = os.path.join(
         UPLOAD_DIR,
-        f"{patient_id}_{filename}"
+        f"{owner_type}_{owner_id}_{filename}"
     )
 
     try:
@@ -75,7 +84,8 @@ async def analyze_report(
 
         return {
             "status": "success",
-            "patient_id": patient_id,
+            "owner_type": owner_type,
+            "owner_id": owner_id,
             "nlp_patient_id": pid,
             "organs": {
                 organ: final_predictions.get(organ, "unknown")
