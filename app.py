@@ -21,7 +21,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS Middleware
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -59,7 +59,6 @@ async def analyze_report(
     user_id: str = Form(...),
     report: UploadFile = File(...)
 ):
-    # Validate file extension
     filename = report.filename or ""
     ext = os.path.splitext(filename)[1].lower()
 
@@ -71,7 +70,7 @@ async def analyze_report(
 
     file_path = os.path.join(
         UPLOAD_DIR,
-        f"{user_type}_{user_id}_{filename}"
+        f"{user_type.value}_{user_id}_{filename}"
     )
 
     try:
@@ -84,7 +83,7 @@ async def analyze_report(
 
         return {
             "status": "success",
-            "user_type": user_type,
+            "user_type": user_type.value,
             "user_id": user_id,
             "nlp_patient_id": pid,
             "organs": {
@@ -112,4 +111,3 @@ async def analyze_report(
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
-```
