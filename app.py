@@ -1,3 +1,4 @@
+```python
 import os
 import shutil
 from enum import Enum
@@ -10,7 +11,7 @@ from decision_layer import predict_from_file
 from config import ORGANS
 
 
-class OwnerType(str, Enum):
+class UserType(str, Enum):
     donor = "donor"
     patient = "patient"
 
@@ -55,8 +56,8 @@ async def health_check():
 
 @app.post("/analyze-report")
 async def analyze_report(
-    owner_type: OwnerType = Form(...),
-    owner_id: str = Form(...),
+    user_type: UserType = Form(...),
+    user_id: str = Form(...),
     report: UploadFile = File(...)
 ):
     # Validate file extension
@@ -71,7 +72,7 @@ async def analyze_report(
 
     file_path = os.path.join(
         UPLOAD_DIR,
-        f"{owner_type}_{owner_id}_{filename}"
+        f"{user_type}_{user_id}_{filename}"
     )
 
     try:
@@ -84,8 +85,8 @@ async def analyze_report(
 
         return {
             "status": "success",
-            "owner_type": owner_type,
-            "owner_id": owner_id,
+            "user_type": user_type,
+            "user_id": user_id,
             "nlp_patient_id": pid,
             "organs": {
                 organ: final_predictions.get(organ, "unknown")
@@ -112,3 +113,4 @@ async def analyze_report(
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
+```
