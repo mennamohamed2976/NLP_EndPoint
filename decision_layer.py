@@ -81,13 +81,15 @@ ORGAN_TEXT_ALIASES = {
 # ─────────────────────────────────────────────
 # تحميل الموديلات مرة واحدة عند start الملف
 # ─────────────────────────────────────────────
-MODELS = {}
-TOKENIZERS = {}
-for organ in ORGANS:
-    path = f"{MODEL_DIR}/{organ}"
-    TOKENIZERS[organ] = AutoTokenizer.from_pretrained(path)
-    MODELS[organ] = AutoModelForSequenceClassification.from_pretrained(path)
-    MODELS[organ].eval()
+def load_models():
+    if MODELS:
+        return
+
+    for organ in ORGANS:
+        path = f"{MODEL_DIR}/{organ}"
+        TOKENIZERS[organ] = AutoTokenizer.from_pretrained(path, local_files_only=True)
+        MODELS[organ] = AutoModelForSequenceClassification.from_pretrained(path, local_files_only=True)
+        MODELS[organ].eval()
 
 
 # ─────────────────────────────────────────────
@@ -292,6 +294,7 @@ def read_report(file_path):
 
 def predict_from_file(file_path):
     # ── 1. قراءة وتنظيف ──
+    load_models()
     raw_text     = read_report(file_path)
     pid          = extract_pid(raw_text)
     findings_raw = extract_findings_section(raw_text)
