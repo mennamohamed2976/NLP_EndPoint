@@ -1,6 +1,6 @@
 import os
 import shutil
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,7 +13,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS Middleware (لو هتتصل من frontend أو service تاني)
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -40,33 +40,43 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy"
+    }
 
 
 @app.post("/analyze-report")
-async def analyze_report(report: UploadFile = File(...)):
-    # ── Validate file extension ──
+async def analyze_report(
+    patient_id: str = Form(...),
+    report: UploadFile = File(...)
+):
+    # Validate file extension
     filename = report.filename or ""
     ext = os.path.splitext(filename)[1].lower()
+
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=400,
             detail=f"Unsupported file type '{ext}'. Only .txt and .pdf are allowed."
         )
 
-    file_path = os.path.join(UPLOAD_DIR, filename)
+    file_path = os.path.join(
+        UPLOAD_DIR,
+        f"{patient_id}_{filename}"
+    )
 
     try:
-        # ── Save uploaded file ──
+        # Save uploaded file
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(report.file, buffer)
 
-        # ── Run BERT + Decision Layer ──
+        # Run NLP Model
         pid, final_predictions, alerts = predict_from_file(file_path)
 
         return {
             "status": "success",
-            "patient_id": pid,
+            "patient_id": patient_id,
+            "nlp_patient_id": pid,
             "organs": {
                 organ: final_predictions.get(organ, "unknown")
                 for organ in ORGANS
@@ -75,7 +85,10 @@ async def analyze_report(report: UploadFile = File(...)):
         }
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
 
     except Exception as e:
         return JSONResponse(
@@ -87,6 +100,5 @@ async def analyze_report(report: UploadFile = File(...)):
         )
 
     finally:
-        # ── Cleanup: حذف الملف بعد التحليل ──
         if os.path.exists(file_path):
             os.remove(file_path)
