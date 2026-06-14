@@ -10,7 +10,7 @@ from config import ORGANS
 from PyPDF2 import PdfReader
 
 
-MODEL_DIR = "models/bert_models"
+MODEL_DIR = "/data/bert_models"
 RESULTS_DIR = "outputs"
 NLP_OUTPUTS_DIR = "nlp_outputs"      # ✅ مجلد منفصل للـ pkl
 os.makedirs(RESULTS_DIR, exist_ok=True)
