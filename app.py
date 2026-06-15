@@ -1,6 +1,6 @@
 import os
 import shutil
-from enum import Enum
+#from enum import Enum
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.responses import JSONResponse
@@ -10,9 +10,9 @@ from decision_layer import predict_from_file
 from config import ORGANS
 
 
-#class UserType(str, Enum):
- #   donor = "donor"
-  #  patient = "patient"
+# class UserType(str, Enum):
+#     donor = "donor"
+#     patient = "patient"
 
 
 app = FastAPI(
@@ -55,7 +55,7 @@ async def health_check():
 
 @app.post("/analyze-report")
 async def analyze_report(
-    user_type: UserType = Form(...),
+    # user_type: UserType = Form(...),
     user_id: str = Form(...),
     report: UploadFile = File(...)
 ):
@@ -70,7 +70,8 @@ async def analyze_report(
 
     file_path = os.path.join(
         UPLOAD_DIR,
-        f"{user_type.value}_{user_id}_{filename}"
+        # f"{user_type.value}_{user_id}_{filename}"
+        f"{user_id}_{filename}"
     )
 
     try:
@@ -83,7 +84,7 @@ async def analyze_report(
 
         return {
             "status": "success",
-            "user_type": user_type.value,
+            # "user_type": user_type.value,
             "user_id": user_id,
             "nlp_patient_id": pid,
             "organs": {
