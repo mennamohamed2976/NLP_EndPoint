@@ -10,9 +10,9 @@ from decision_layer import predict_from_file
 from config import ORGANS
 
 
-class UserType(str, Enum):
-    donor = "donor"
-    patient = "patient"
+#class UserType(str, Enum):
+ #   donor = "donor"
+  #  patient = "patient"
 
 
 app = FastAPI(
